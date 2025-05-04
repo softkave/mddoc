@@ -1,0 +1,62 @@
+{
+  "name": "mddoc",
+  "version": "0.1.0",
+  "description": "",
+  "type": "module",
+  "main": "./build/index.js",
+  "typings": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "node": {
+        "types": "./build/index.node.d.ts",
+        "default": "./build/index.node.js"
+      },
+      "browser": {
+        "types": "./build/index.browser.d.ts",
+        "default": "./build/index.browser.js"
+      },
+      "default": {
+        "types": "./build/index.d.ts",
+        "default": "./build/index.js"
+      }
+    }
+  },
+  "files": [
+    "build/{*.js,**/*.js}",
+    "build/{*.js.map,**/*.js.map}",
+    "build/{*.d.ts,**/*.d.ts}",
+    "!build/**/__tests__/**/*",
+    "!build/**/testutils/**/*",
+    "!build/private*"
+  ],
+  "scripts": {
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "compile": "npm run clean && tsc",
+    "fix": "gts fix",
+    "test": "env-cmd -f \".env.test\" vitest --config=./vitest.config.ts",
+    "test:browser": "env-cmd -f \".env.test\" vitest --config=./vitest.browser.config.ts",
+    "publish:npm": "npm run compile && npm publish",
+    "publish:local": "npm run compile && yalc publish",
+    "show:packlist": "npm run compile && npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=13"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.8",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/browser": "^3.0.9",
+    "gts": "^3.1.1",
+    "playwright": "^1.49.1",
+    "typescript": "^5.5.2",
+    "vitest": "^3.0.9",
+    "vitest-browser-react": "^0.0.4"
+  },
+  "dependencies": {
+    "assert": "^2.1.0",
+    "axios": "^1.8.4",
+    "lodash-es": "^4.17.21",
+    "softkave-js-utils": "^0.16.3"
+  }
+}

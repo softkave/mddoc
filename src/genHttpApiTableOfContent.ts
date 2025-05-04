@@ -3,7 +3,7 @@ import {forEach} from 'lodash-es';
 import {MddocHttpEndpointDefinitionTypePrimitive} from './mddoc.js';
 import {filterEndpointsByTags} from './utils.js';
 
-function generateTableOfContentFromFimidaraPublicEndpoints(params: {
+function generateTableOfContentFromMddoc(params: {
   endpoints: MddocHttpEndpointDefinitionTypePrimitive[];
   tags: string[];
 }) {
@@ -24,7 +24,7 @@ export async function genHttpApiTableOfContent(params: {
   outputPath: string;
 }) {
   const {endpoints, tags, outputPath} = params;
-  const tableOfContent = generateTableOfContentFromFimidaraPublicEndpoints({
+  const tableOfContent = generateTableOfContentFromMddoc({
     endpoints,
     tags,
   });

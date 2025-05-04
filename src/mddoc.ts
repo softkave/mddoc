@@ -405,7 +405,7 @@ function constructHttpEndpointDefinition<
   TResponseBody extends AnyObject = AnyObject,
   TSdkParams extends AnyObject = TRequestBody,
 >(
-  params: OmitFrom<
+  params: Omit<
     MddocHttpEndpointDefinitionTypePrimitive<
       TRequestHeaders,
       TPathParameters,

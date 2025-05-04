@@ -5,6 +5,7 @@ import {compact, forEach, last, nth, set, upperFirst} from 'lodash-es';
 import path from 'path';
 import {AnyObject, isObjectEmpty, pathSplit} from 'softkave-js-utils';
 import {Doc} from './doc.js';
+import {findAndReplaceMddocInFilesInDirectory} from './findAndReplace.js';
 import {
   isMddocFieldArray,
   isMddocFieldBinary,
@@ -305,7 +306,7 @@ function generateEndpointCode(
   let param0 = '';
   let resultType = 'void';
   let templateParams = '';
-  let param1 = 'opts?: FimidaraEndpointOpts';
+  let param1 = 'opts?: MddocEndpointOpts';
 
   const isBinaryRequest = decideIsBinaryRequest(requestBodyRaw);
   const isBinaryResponse = isMddocFieldBinary(successResponseBodyRaw);
@@ -315,7 +316,7 @@ function generateEndpointCode(
     doc.appendImportFromGenTypes([successResponseBodyObject.name]);
     resultType = successResponseBodyObject.name;
   } else if (isBinaryResponse) {
-    resultType = 'FimidaraEndpointResultWithBinaryResponse<TResponseType>';
+    resultType = 'MddocEndpointResultWithBinaryResponse<TResponseType>';
   }
 
   if (sdkRequestObject) {
@@ -334,13 +335,13 @@ function generateEndpointCode(
     bodyText.push('responseType: opts.responseType,');
     templateParams = "<TResponseType extends 'blob' | 'stream'>";
     param1 =
-      'opts: FimidaraEndpointDownloadBinaryOpts<TResponseType> ' +
-      '= {responseType: "blob"} as FimidaraEndpointDownloadBinaryOpts<TResponseType>';
+      'opts: MddocEndpointDownloadBinaryOpts<TResponseType> ' +
+      '= {responseType: "blob"} as MddocEndpointDownloadBinaryOpts<TResponseType>';
   }
 
   if (isBinaryRequest) {
     bodyText.push('formdata: props,');
-    param1 = 'opts?: FimidaraEndpointUploadBinaryOpts';
+    param1 = 'opts?: MddocEndpointUploadBinaryOpts';
   } else if (sdkRequestObject) {
     bodyText.push('data: props,');
   }
@@ -370,7 +371,7 @@ function generateEndpointCode(
     }, opts, ${mapping.length ? 'mapping' : ''});
   }`;
 
-  doc.appendToClass(text, className, 'FimidaraEndpointsBase');
+  doc.appendToClass(text, className, 'MddocEndpointsBase');
 }
 
 function generateEveryEndpointCode(
@@ -416,11 +417,11 @@ function generateEveryEndpointCode(
 
   doc.appendImport(
     [
-      'FimidaraEndpointsBase',
-      'FimidaraEndpointResultWithBinaryResponse',
-      'FimidaraEndpointOpts',
-      'FimidaraEndpointDownloadBinaryOpts',
-      'FimidaraEndpointUploadBinaryOpts',
+      'MddocEndpointsBase',
+      'MddocEndpointResultWithBinaryResponse',
+      'MddocEndpointOpts',
+      'MddocEndpointDownloadBinaryOpts',
+      'MddocEndpointUploadBinaryOpts',
     ],
     './endpointImports.ts'
   );
@@ -448,12 +449,12 @@ function generateEveryEndpointCode(
     doc.appendToClass(
       `${ownName} = new ${upperFirst(ownName)}Endpoints(this.config, this);`,
       `${upperFirst(parentName)}Endpoints`,
-      'FimidaraEndpointsBase'
+      'MddocEndpointsBase'
     );
   }
 
   for (const ownName in branchMap) {
-    docBranch('fimidara', ownName, branchMap[ownName]);
+    docBranch('mddoc', ownName, branchMap[ownName]);
   }
 }
 
@@ -491,8 +492,9 @@ export async function genJsSdk(params: {
   filenamePrefix: string;
   tags: string[];
   outputDir: string;
+  applicationName: string;
 }) {
-  const {endpoints, filenamePrefix, tags, outputDir} = params;
+  const {endpoints, filenamePrefix, tags, outputDir, applicationName} = params;
   const endpointsDir = path.normalize(outputDir + '/src/endpoints');
   const typesFilename = `${filenamePrefix}Types.ts`;
   const typesFilepath = path.normalize(endpointsDir + '/' + typesFilename);
@@ -519,6 +521,8 @@ export async function genJsSdk(params: {
     fse.writeFile(typesFilepath, typesDoc.compileText(), {encoding: 'utf-8'}),
     fse.writeFile(codesFilepath, codesDoc.compileText(), {encoding: 'utf-8'}),
   ]);
+
+  await findAndReplaceMddocInFilesInDirectory(endpointsDir, applicationName);
 
   execSync(`npx code-migration-helpers add-ext -f="${endpointsDir}"`, {
     stdio: 'inherit',
