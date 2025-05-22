@@ -31,7 +31,6 @@ export default defineConfig({
       allow: [
         // search up for workspace root searchForWorkspaceRoot(process.cwd()),
         // your custom rules
-        '/src/testutils/testdata',
       ],
     },
   },

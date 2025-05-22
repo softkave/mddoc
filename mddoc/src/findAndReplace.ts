@@ -1,5 +1,6 @@
 import * as caseFns from 'case';
 import {promises as fs} from 'fs';
+
 const kReplaceMddocRegex = /(mddoc)([\w-]*)/gi;
 
 export function findAndReplaceMddoc(input: string, replacement: string) {
@@ -93,6 +94,5 @@ export async function findAndReplaceMddocInFilesInDirectory(
     }
   }
 
-  console.log('filePathsToProcess', filePathsToProcess);
   await findAndReplaceMddocInFiles(filePathsToProcess, replacement);
 }

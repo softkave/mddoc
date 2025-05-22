@@ -38,8 +38,8 @@ bower_components
 build/Release
 
 # Dependency directories
-node_modules/
-jspm_packages/
+node_modules
+jspm_packages
 
 # TypeScript v1 declaration files
 typings/
@@ -103,8 +103,7 @@ dist
 .tern-port
 
 # build folder
-build/
-email-templates/compiled-code
+build
 
 # AWS config
 aws-config.json
@@ -112,19 +111,8 @@ aws-config.json
 # Jest output
 jest-output/
 
-# DB path for mongo replicas run using `run-rs`, check script in `package.json`
-dev-mongo-rs-data/
-test-mongo-rs-data/
-
-# Local file persistence backend save dir
-dev-local-fs/
-test-local-fs/
-
-# Runtime logs
-runtime-logs/
-
 # Yalc cache
-.yalc/
+.yalc
 yalc.lock
 
 .DS_Store

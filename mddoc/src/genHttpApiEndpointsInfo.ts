@@ -1,12 +1,12 @@
 import fse from 'fs-extra';
 import {forEach} from 'lodash-es';
 import {posix} from 'path';
-import {kMddocEndpointHttpHeaderItems} from './headers.js';
+import {kMddocHttpHeaderItems} from './headers.js';
 import {
   mddocConstruct,
   MddocHttpEndpointDefinitionTypePrimitive,
 } from './mddoc.js';
-import {kMddocEndpointHttpResponseItems} from './responseBody.js';
+import {kMddocHttpResponseItems} from './response.js';
 import {filterEndpointsByTags} from './utils.js';
 
 function generateEndpointInfoFromEndpoints(params: {
@@ -25,10 +25,9 @@ function generateEndpointInfoFromEndpoints(params: {
       ...endpoint,
       errorResponseHeaders:
         endpoint.errorResponseHeaders ??
-        kMddocEndpointHttpHeaderItems.responseHeaders_JsonContentType,
+        kMddocHttpHeaderItems.responseHeaders_JsonContentType,
       errorResponseBody:
-        endpoint.errorResponseBody ??
-        kMddocEndpointHttpResponseItems.errorResponseBody,
+        endpoint.errorResponseBody ?? kMddocHttpResponseItems.errorResponseBody,
     });
 
     infoMap.set(

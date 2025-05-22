@@ -4,7 +4,7 @@ export * from './genHttpApiTableOfContent.js';
 export * from './genJsSdk.js';
 export * from './headers.js';
 export * from './mddoc.js';
-export * from './responseBody.js';
+export * from './response.js';
 export * from './setupJsSdk.js';
 export * from './statusCodes.js';
 export * from './types.js';

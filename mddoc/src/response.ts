@@ -42,7 +42,7 @@ const emptySuccessResponseBody = mddocConstruct.constructObject<AnyObject>({
   fields: {},
 });
 
-export const kMddocEndpointHttpResponseItems = {
+export const kMddocHttpResponseItems = {
   errorResponseBody,
   emptySuccessResponseBody,
 };

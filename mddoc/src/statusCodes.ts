@@ -1,4 +1,4 @@
-export const kMddocHTTPEndpointStatusCodes = {
+export const kMddocHttpStatusCodes = {
   ok: 200,
   badRequest: 400,
   unauthorized: 401,

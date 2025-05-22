@@ -246,9 +246,6 @@ describe('findAndReplaceMddocInFilesInDirectory', () => {
       recursive: true,
     });
 
-    // @ts-ignore
-    console.log('readFile', fs.promises.readFile.mock.calls);
-
     expect(fs.promises.readFile).toHaveBeenCalledTimes(2);
     expect(fs.promises.writeFile).toHaveBeenCalledTimes(2);
     expect(fs.promises.readFile).toHaveBeenCalledWith(

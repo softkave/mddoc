@@ -1,3 +1,4 @@
+import assert from 'assert';
 import axios, {
   AxiosProgressEvent,
   AxiosResponse,
@@ -5,7 +6,6 @@ import axios, {
   toFormData,
 } from 'axios';
 import {AnyObject} from 'softkave-js-utils';
-import {kDefaultServerURL} from './constants.js';
 import {MddocEndpointError, MddocEndpointErrorItem} from './error.js';
 import {MddocEndpointHeaders} from './types.js';
 
@@ -77,8 +77,11 @@ export async function invokeEndpoint(props: InvokeEndpointParams) {
     outgoingHeaders[kHttpHeaderAuthorization] = `Bearer ${bearerToken}`;
   }
 
-  const endpointURL =
-    propsEndpointURL || (serverURL || kDefaultServerURL) + path;
+  let endpointURL = propsEndpointURL;
+  if (!endpointURL) {
+    assert(serverURL, 'serverURL is required');
+    endpointURL = serverURL + path;
+  }
 
   try {
     /**

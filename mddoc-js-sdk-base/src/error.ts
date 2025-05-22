@@ -22,7 +22,7 @@ export class MddocEndpointError extends Error {
   ) {
     super(
       errors.map(item => item.message).join('\n') ||
-        'mddoc endpoint error. ' +
+        'Endpoint error. ' +
           'This could be because the client is not able to connect to the server. ' +
           'Please check your internet connection or check with Support if the issue persists.'
     );

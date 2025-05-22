@@ -4,7 +4,7 @@ import {
   mddocConstruct,
   MddocHttpEndpointDefinitionTypePrimitive,
   MddocHttpEndpointMethod,
-} from '../../../src/index.js';
+} from '../../../mddoc/src/index.js';
 
 const endpoint01 = mddocConstruct.constructHttpEndpointDefinition({
   name: 'get-user',

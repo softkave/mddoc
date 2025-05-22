@@ -1,5 +1,5 @@
 import {mddocConstruct} from './mddoc.js';
-import {kMddocHTTPEndpointStatusCodes} from './statusCodes.js';
+import {kMddocHttpStatusCodes} from './statusCodes.js';
 
 export const kMddocHTTPHeaderNames = {
   Authorization: 'Authorization',
@@ -8,7 +8,7 @@ export const kMddocHTTPHeaderNames = {
 } as const;
 
 export const kMddocEndpointStatusCodes = {
-  success: `${kMddocHTTPEndpointStatusCodes.ok}`,
+  success: `${kMddocHttpStatusCodes.ok}`,
   error: '4XX or 5XX',
 } as const;
 
@@ -211,7 +211,7 @@ const responseHeaders_JsonContentType =
     }
   );
 
-export const kMddocEndpointHttpHeaderItems = {
+export const kMddocHttpHeaderItems = {
   requestHeaderItem_Authorization,
   requestHeaderItem_ContentType,
   responseHeaderItem_JsonContentType,
