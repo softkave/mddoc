@@ -5,7 +5,7 @@ import {compact, forEach, last, nth, set, upperFirst} from 'lodash-es';
 import path from 'path';
 import {AnyObject, isObjectEmpty, pathSplit} from 'softkave-js-utils';
 import {Doc} from './doc.js';
-import {findAndReplaceMddocInFilesInDirectory} from './findAndReplace.js';
+import {getEndpointsFromSrcPath} from './getEndpointsFromSrcPath.js';
 import {
   isMddocFieldArray,
   isMddocFieldBinary,
@@ -33,7 +33,7 @@ import {
   MddocHttpEndpointDefinitionTypePrimitive,
   objectHasRequiredFields,
 } from './mddoc.js';
-import {filterEndpointsByTags} from './utils.js';
+import {filterEndpointsByTags, hasPackageJson} from './utils.js';
 
 function getEnumType(doc: Doc, item: MddocFieldStringTypePrimitive) {
   const name = item.enumName;
@@ -196,10 +196,10 @@ function getTypesFromEndpoint(
   const sdkRequestObject = isMddocFieldObject(sdkRequestBodyRaw)
     ? sdkRequestBodyRaw
     : isMddocMultipartFormdata(sdkRequestBodyRaw)
-      ? sdkRequestBodyRaw.items
-      : isMddocSdkParamsBody(sdkRequestBodyRaw)
-        ? sdkRequestBodyRaw.def
-        : undefined;
+    ? sdkRequestBodyRaw.items
+    : isMddocSdkParamsBody(sdkRequestBodyRaw)
+    ? sdkRequestBodyRaw.def
+    : undefined;
 
   // Success response body
   const successResponseBodyRaw = endpoint.responseBody;
@@ -398,8 +398,8 @@ function generateEveryEndpointCode(
     // pathname looks like /v1/agentToken/addAgentToken, which should yield 4
     // parts, but pathSplit, removes empty strings, so we'll have ["v1",
     // "agentToken", "addAgentToken"]. also filter out path params.
-    const [, ...rest] = pathSplit({input: pathname}).filter(
-      p => !p.startsWith(':')
+    const rest = pathSplit({input: pathname}).filter(
+      p => !p.startsWith(':') && p.length > 0
     );
 
     assert(rest.length >= 2);
@@ -418,12 +418,12 @@ function generateEveryEndpointCode(
   doc.appendImport(
     [
       'MddocEndpointsBase',
-      'MddocEndpointResultWithBinaryResponse',
-      'MddocEndpointOpts',
-      'MddocEndpointDownloadBinaryOpts',
-      'MddocEndpointUploadBinaryOpts',
+      'type MddocEndpointResultWithBinaryResponse',
+      'type MddocEndpointOpts',
+      'type MddocEndpointDownloadBinaryOpts',
+      'type MddocEndpointUploadBinaryOpts',
     ],
-    './endpointImports.ts'
+    'mddoc-js-sdk-base'
   );
 
   for (const groupName in leafEndpointsMap) {
@@ -487,25 +487,50 @@ function uniqEnpoints(
   });
 }
 
+async function addCodeLinesToIndex(params: {
+  indexPath: string;
+  codeLines: string[];
+}) {
+  const {indexPath, codeLines} = params;
+  const indexText = await fse.readFile(indexPath, {encoding: 'utf-8'});
+  const codeLinesNotFound = codeLines.filter(line => !indexText.includes(line));
+  if (codeLinesNotFound.length) {
+    await fse.writeFile(indexPath, indexText + codeLinesNotFound.join('\n'), {
+      encoding: 'utf-8',
+    });
+  }
+}
+
 export async function genJsSdk(params: {
   endpoints: MddocHttpEndpointDefinitionTypePrimitive[];
   filenamePrefix: string;
   tags: string[];
   outputDir: string;
-  applicationName: string;
 }) {
-  const {endpoints, filenamePrefix, tags, outputDir, applicationName} = params;
-  const endpointsDir = path.normalize(outputDir + '/src/endpoints');
-  const typesFilename = `${filenamePrefix}Types.ts`;
-  const typesFilepath = path.normalize(endpointsDir + '/' + typesFilename);
-  const codesFilepath = path.normalize(
-    endpointsDir + `/${filenamePrefix}Endpoints.ts`
+  const {endpoints, filenamePrefix, tags, outputDir} = params;
+  assert(
+    await hasPackageJson({outputPath: outputDir}),
+    'outputDir must be a valid npm package'
   );
-  const typesDoc = new Doc('./' + typesFilename);
-  const codesDoc = new Doc('./' + typesFilename);
+
+  const endpointsDir = path.normalize(outputDir + '/src/http');
+
+  const typesFilename = `${filenamePrefix}Types`;
+  const typesFilenameWithExt = `${typesFilename}.ts`;
+  const typesFilepath = path.normalize(
+    endpointsDir + '/' + typesFilenameWithExt
+  );
+
+  const codesFilename = `${filenamePrefix}Endpoints`;
+  const codesFilenameWithExt = `${codesFilename}.ts`;
+  const codesFilepath = path.normalize(
+    endpointsDir + '/' + codesFilenameWithExt
+  );
+
+  const typesDoc = new Doc({genTypesFilepath: `./${typesFilenameWithExt}`});
+  const codesDoc = new Doc({genTypesFilepath: `./${typesFilenameWithExt}`});
 
   const httpEndpoints = filterEndpointsByTags(endpoints, tags);
-
   forEach(httpEndpoints, e1 => {
     if (e1) {
       documentTypesFromEndpoint(typesDoc, e1);
@@ -522,11 +547,34 @@ export async function genJsSdk(params: {
     fse.writeFile(codesFilepath, codesDoc.compileText(), {encoding: 'utf-8'}),
   ]);
 
-  await findAndReplaceMddocInFilesInDirectory(endpointsDir, applicationName);
+  await addCodeLinesToIndex({
+    indexPath: path.normalize(endpointsDir + '/index.ts'),
+    codeLines: [
+      `export * from './${typesFilename}.js';`,
+      `export * from './${codesFilename}.js';`,
+    ],
+  });
 
-  execSync(`npx code-migration-helpers add-ext -f="${endpointsDir}"`, {
+  // execSync(`npx code-migration-helpers add-ext -f="${endpointsDir}"`, {
+  //   stdio: 'inherit',
+  // });
+  execSync(`cd ${outputDir} && npm run pretty`, {
     stdio: 'inherit',
   });
-  execSync(`npx --yes prettier --write "${typesFilepath}"`, {stdio: 'inherit'});
-  execSync(`npx --yes prettier --write "${codesFilepath}"`, {stdio: 'inherit'});
+}
+
+export async function genJsSdkCmd(params: {
+  srcPath: string;
+  outputPath: string;
+  filenamePrefix: string;
+  tags: string[];
+}) {
+  const {srcPath, filenamePrefix, tags, outputPath} = params;
+  const endpoints = await getEndpointsFromSrcPath({srcPath});
+  await genJsSdk({
+    endpoints,
+    filenamePrefix,
+    tags,
+    outputDir: outputPath,
+  });
 }

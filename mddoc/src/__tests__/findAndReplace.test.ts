@@ -110,7 +110,7 @@ describe('findAndReplaceMddocInFilesInDirectory', () => {
     const mockContent = 'mddocTest content';
 
     vi.mocked(fs.promises.readdir).mockResolvedValue(
-      filePaths.map(name => ({name, isFile: () => true}) as fs.Dirent)
+      filePaths.map(name => ({name, isFile: () => true} as fs.Dirent<any>))
     );
     vi.mocked(fs.promises.stat).mockResolvedValue({
       isFile: () => true,
@@ -135,7 +135,8 @@ describe('findAndReplaceMddocInFilesInDirectory', () => {
 
     vi.mocked(fs.promises.readdir).mockResolvedValue(
       filePaths.map(
-        name => ({name, isFile: () => name !== 'node_modules'}) as fs.Dirent
+        name =>
+          ({name, isFile: () => name !== 'node_modules'} as fs.Dirent<any>)
       )
     );
     vi.mocked(fs.promises.stat).mockImplementation(path => {
@@ -172,7 +173,7 @@ describe('findAndReplaceMddocInFilesInDirectory', () => {
             name,
             isFile: () => name === 'file1.txt',
             isDirectory: () => name === 'subdir',
-          }) as fs.Dirent
+          } as fs.Dirent<any>)
       )
     );
 
@@ -214,7 +215,7 @@ describe('findAndReplaceMddocInFilesInDirectory', () => {
                 name,
                 isFile: () => name === 'file1.txt',
                 isDirectory: () => name === 'subdir',
-              }) as fs.Dirent
+              } as fs.Dirent<any>)
           )
         );
       } else if ((path as string).includes('subdir')) {
@@ -225,7 +226,7 @@ describe('findAndReplaceMddocInFilesInDirectory', () => {
                 name,
                 isFile: () => true,
                 isDirectory: () => false,
-              }) as fs.Dirent
+              } as fs.Dirent)
           )
         );
       }

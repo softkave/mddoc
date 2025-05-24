@@ -1,13 +1,14 @@
 {
-  "name": "",
-  "version": "0.0.0",
-  "description": "",
+  "name": "mddoc-examples-gen-js-sdk",
+  "version": "0.1.0",
+  "description": "Example of using mddoc to generate a JS SDK",
+  "type": "module",
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "files": [
     "build/src"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "keywords": [],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "gts": "^6.0.2",
     "typescript": "^5.6.3",
-    "@types/node": "^22.7.5"
+    "@types/node": "^22.7.5",
+    "mddoc": "workspace:*"
   }
 }

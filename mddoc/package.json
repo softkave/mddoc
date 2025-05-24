@@ -20,11 +20,12 @@
   "types": "build/src/index.d.ts",
   "exports": {
     ".": {
-      "types": "./build/index.d.ts",
-      "import": "./build/index.js",
-      "default": "./build/index.js"
+      "types": "./build/src/index.d.ts",
+      "import": "./build/src/index.js",
+      "default": "./build/src/index.js"
     }
   },
+  "bin": "build/src/bin/main.js",
   "files": [
     "build/{*.js,**/*.js}",
     "build/{*.cjs,**/*.cjs}",
@@ -43,7 +44,8 @@
     "test": "vitest --config ./vitest.config.ts",
     "lint": "gts lint",
     "clean": "gts clean",
-    "compile": "npm run clean && tsc",
+    "copy:build": "npx -y tsx src/copyBuildArtifacts.ts",
+    "compile": "npm run clean && tsc && npm run copy:build",
     "fix": "gts fix",
     "pretest": "npm run compile",
     "posttest": "npm run lint",
@@ -63,13 +65,16 @@
   },
   "dependencies": {
     "case": "^1.6.3",
+    "commander": "^14.0.0",
     "fs-extra": "^11.3.0",
     "js-accessor": "^1.2.0",
     "lodash-es": "^4.17.21",
     "softkave-js-utils": "^0.15.0",
-    "type-fest": "^4.37.0"
+    "tsx": "^4.19.4",
+    "type-fest": "^4.37.0",
+    "zod": "^3.25.20"
   },
   "engines": {
-    "node": ">=13"
+    "node": ">=24"
   }
 }

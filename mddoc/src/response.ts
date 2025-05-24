@@ -5,13 +5,6 @@ import {BaseEndpointResult, ExternalError} from './types.js';
 const errorObject = mddocConstruct.constructObject<ExternalError>({
   name: 'ExternalError',
   fields: {
-    name: mddocConstruct.constructObjectField({
-      required: true,
-      data: mddocConstruct.constructString({
-        description: 'Error name',
-        example: 'ValidationError',
-      }),
-    }),
     message: mddocConstruct.constructObjectField({
       required: true,
       data: mddocConstruct.constructString({

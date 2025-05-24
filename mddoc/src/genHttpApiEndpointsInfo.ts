@@ -1,6 +1,7 @@
 import fse from 'fs-extra';
 import {forEach} from 'lodash-es';
 import {posix} from 'path';
+import {getEndpointsFromSrcPath} from './getEndpointsFromSrcPath.js';
 import {kMddocHttpHeaderItems} from './headers.js';
 import {
   mddocConstruct,
@@ -61,9 +62,19 @@ export async function genHttpApiEndpointsInfo(params: {
       .join('/');
     const method = endpoint.method;
     const filename = `${pathname}__${method}.json`;
-    const endpointPath = posix.normalize(outputPath + filename);
+    const endpointPath = posix.normalize(outputPath + '/' + filename);
     promises.push(writeEndpointInfoToFile(endpointPath, info));
   });
 
   return Promise.all(promises);
+}
+
+export async function genHttpApiEndpointsInfoCmd(params: {
+  srcPath: string;
+  tags: string[];
+  outputPath: string;
+}) {
+  const {srcPath, tags, outputPath} = params;
+  const endpoints = await getEndpointsFromSrcPath({srcPath});
+  await genHttpApiEndpointsInfo({endpoints, tags, outputPath});
 }

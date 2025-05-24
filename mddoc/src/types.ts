@@ -1,5 +1,4 @@
 export type ExternalError = {
-  name: string;
   message: string;
 };
 

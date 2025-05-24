@@ -85,7 +85,7 @@ export interface MddocFieldArrayTypePrimitive<T> extends MddocFieldIdPrimitive {
 
 export interface MddocFieldObjectFieldTypePrimitive<
   T,
-  TRequired extends boolean = any,
+  TRequired extends boolean = any
 > extends MddocFieldIdPrimitive {
   required: TRequired;
   data: ConvertToMddocType<T>;
@@ -94,32 +94,31 @@ export interface MddocFieldObjectFieldTypePrimitive<
 
 export type ConvertToMddocType<
   T = any,
-  TAllowOrCombination extends boolean = true,
-> =
-  IsNever<
-    IsUnion<Exclude<T, undefined>> &
-      TAllowOrCombination &
-      Not<IsStringEnum<Exclude<T, undefined>>> &
-      Not<IsBoolean<Exclude<T, undefined>>>
-  > extends false
-    ? MddocFieldOrCombinationTypePrimitive<Array<ConvertToMddocType<T, false>>>
-    : T extends string
-      ? MddocFieldStringTypePrimitive
-      : T extends number
-        ? MddocFieldNumberTypePrimitive
-        : T extends boolean
-          ? MddocFieldBooleanTypePrimitive
-          : T extends Array<infer InferedType>
-            ? MddocFieldArrayTypePrimitive<InferedType>
-            : T extends Buffer
-              ? MddocFieldBinaryTypePrimitive
-              : T extends Readable
-                ? MddocFieldBinaryTypePrimitive
-                : T extends null
-                  ? MddocFieldNullTypePrimitive
-                  : T extends AnyObject
-                    ? MddocFieldObjectTypePrimitive<Exclude<T, undefined>>
-                    : MddocFieldBaseTypePrimitive;
+  TAllowOrCombination extends boolean = true
+> = IsNever<
+  IsUnion<Exclude<T, undefined>> &
+    TAllowOrCombination &
+    Not<IsStringEnum<Exclude<T, undefined>>> &
+    Not<IsBoolean<Exclude<T, undefined>>>
+> extends false
+  ? MddocFieldOrCombinationTypePrimitive<Array<ConvertToMddocType<T, false>>>
+  : T extends string
+  ? MddocFieldStringTypePrimitive
+  : T extends number
+  ? MddocFieldNumberTypePrimitive
+  : T extends boolean
+  ? MddocFieldBooleanTypePrimitive
+  : T extends Array<infer InferedType>
+  ? MddocFieldArrayTypePrimitive<InferedType>
+  : T extends Buffer
+  ? MddocFieldBinaryTypePrimitive
+  : T extends Readable
+  ? MddocFieldBinaryTypePrimitive
+  : T extends null
+  ? MddocFieldNullTypePrimitive
+  : T extends AnyObject
+  ? MddocFieldObjectTypePrimitive<Exclude<T, undefined>>
+  : MddocFieldBaseTypePrimitive;
 
 export type MddocFieldObjectFieldsMap<T extends object> = Required<{
   [K in keyof T]: K extends OptionalKeysOf<T>
@@ -135,7 +134,7 @@ export interface MddocFieldObjectTypePrimitive<T extends object>
 }
 
 export interface MddocFieldOrCombinationTypePrimitive<
-  T extends MddocFieldBaseTypePrimitive[] = MddocFieldBaseTypePrimitive[],
+  T extends MddocFieldBaseTypePrimitive[] = MddocFieldBaseTypePrimitive[]
 > extends MddocFieldIdPrimitive {
   types: T;
   description?: string;
@@ -152,7 +151,7 @@ export type MddocMappingFn<
   TRequestHeaders,
   TPathParameters,
   TQuery,
-  TRequestBody,
+  TRequestBody
 > = AnyFn<
   [keyof TSdkParams],
   | ['header', keyof TRequestHeaders]
@@ -167,7 +166,7 @@ export type MddocSdkParamsToRequestArtifactsMapping<
   TRequestHeaders,
   TPathParameters,
   TQuery,
-  TRequestBody,
+  TRequestBody
 > = AnyFn<
   [keyof TSdkParams],
   Array<
@@ -183,7 +182,7 @@ export interface MddocSdkParamsBodyTypePrimitive<
   TRequestHeaders extends object = any,
   TPathParameters extends object = any,
   TQuery extends object = any,
-  TRequestBody extends object = any,
+  TRequestBody extends object = any
 > extends MddocFieldIdPrimitive {
   def?: MddocFieldObjectTypePrimitive<T>;
   mappings: MddocMappingFn<
@@ -197,7 +196,7 @@ export interface MddocSdkParamsBodyTypePrimitive<
 }
 
 export interface MddocHttpEndpointMultipartFormdataTypePrimitive<
-  T extends object = any,
+  T extends object = any
 > extends MddocFieldIdPrimitive {
   items?: MddocFieldObjectTypePrimitive<T>;
   description?: string;
@@ -210,7 +209,7 @@ export interface MddocHttpEndpointDefinitionTypePrimitive<
   TRequestBody extends AnyObject = AnyObject,
   TResponseHeaders extends AnyObject = AnyObject,
   TResponseBody extends AnyObject = AnyObject,
-  TSdkParams extends AnyObject = TRequestBody,
+  TSdkParams extends AnyObject = TRequestBody
 > extends MddocFieldIdPrimitive {
   basePathname: string;
   method: MddocHttpEndpointMethod;
@@ -242,19 +241,21 @@ export interface MddocHttpEndpointDefinitionTypePrimitive<
   errorResponseBody?: MddocFieldObjectTypePrimitive<BaseEndpointResult>;
 }
 
-export type InferMddocFieldObjectType<T, TDefault = never> =
-  T extends MddocFieldObjectTypePrimitive<infer TObjectType>
-    ? TObjectType
-    : TDefault;
+export type InferMddocFieldObjectType<
+  T,
+  TDefault = never
+> = T extends MddocFieldObjectTypePrimitive<infer TObjectType>
+  ? TObjectType
+  : TDefault;
 
 export type InferMddocFieldObjectOrMultipartType<T> =
   T extends MddocFieldObjectTypePrimitive<infer TObjectType>
     ? TObjectType
     : T extends MddocHttpEndpointMultipartFormdataTypePrimitive<
-          infer TMultipartObjectType
-        >
-      ? TMultipartObjectType
-      : never;
+        infer TMultipartObjectType
+      >
+    ? TMultipartObjectType
+    : never;
 
 export type InferMddocSdkParamsType<T> =
   T extends MddocSdkParamsBodyTypePrimitive<infer TObjectType>
@@ -403,7 +404,7 @@ function constructHttpEndpointDefinition<
   TRequestBody extends AnyObject = AnyObject,
   TResponseHeaders extends AnyObject = AnyObject,
   TResponseBody extends AnyObject = AnyObject,
-  TSdkParams extends AnyObject = TRequestBody,
+  TSdkParams extends AnyObject = TRequestBody
 >(
   params: Omit<
     MddocHttpEndpointDefinitionTypePrimitive<
@@ -604,3 +605,15 @@ export function isMddocSdkParamsBody(
       kMddocFieldTypes.SdkParamsBody
   );
 }
+
+type KT = OptionalKeysOf<{
+  errors: {
+    message: string;
+  }[];
+}>;
+
+type KM = MddocFieldObjectFieldsMap<{
+  errors: {
+    message: string;
+  }[];
+}>;

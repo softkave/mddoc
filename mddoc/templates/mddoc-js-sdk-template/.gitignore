@@ -117,8 +117,3 @@ yalc.lock
 
 .DS_Store
 *.DS_Store
-
-# examples
-examples/gen-js-sdk/example-js-sdk
-examples/gen-js-sdk/example-toc
-examples/gen-js-sdk/example-endpoints-info

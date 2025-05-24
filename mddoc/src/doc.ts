@@ -3,7 +3,7 @@ import {uniq} from 'lodash-es';
 export class Doc {
   protected disclaimer =
     '// This file is auto-generated, do not modify directly. \n' +
-    '// Reach out to @abayomi to suggest changes.\n';
+    '// Reach out to a code owner to suggest changes.\n';
   protected endpointsText = '';
   protected typesText = '';
   protected docImports: Record<string, {importing: string[]; from: string}> =
@@ -19,7 +19,7 @@ export class Doc {
 
   generatedTypeCache: Map<string, boolean> = new Map();
 
-  constructor(protected genTypesFilename: string) {}
+  constructor(protected props: {genTypesFilepath: string}) {}
 
   appendType(typeText: string) {
     this.typesText += typeText + '\n';
@@ -57,7 +57,16 @@ export class Doc {
   }
 
   appendImportFromGenTypes(importing: string[]) {
-    return this.appendImport(importing, this.genTypesFilename);
+    let filename = this.props.genTypesFilepath;
+    if (filename.endsWith('.ts')) {
+      filename = filename.replace('.ts', '.js');
+    } else if (!filename.endsWith('.js')) {
+      filename = filename + '.js';
+    }
+    return this.appendImport(
+      importing.map(i => `type ${i}`),
+      filename
+    );
   }
 
   appendToClass(entry: string, name: string, extendsName?: string) {
