@@ -1,4 +1,4 @@
 packages:
-  - mddoc
+  - mfdoc
   - examples/*
   - base/*

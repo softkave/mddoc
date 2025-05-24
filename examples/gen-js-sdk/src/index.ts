@@ -1,52 +1,52 @@
-import {mddocConstruct, MddocHttpEndpointMethod} from 'mddoc';
+import {mfdocConstruct, MfdocHttpEndpointMethod} from 'mfdoc';
 
-export const endpoint01 = mddocConstruct.constructHttpEndpointDefinition({
+export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
   name: 'get-user',
-  method: MddocHttpEndpointMethod.Get,
+  method: MfdocHttpEndpointMethod.Get,
   basePathname: '/user/:userId/info',
   description: 'Get user',
   tags: ['user'],
-  requestHeaders: mddocConstruct.constructObject<{
+  requestHeaders: mfdocConstruct.constructObject<{
     'x-api-key': string;
   }>({
     name: 'GetUserRequestHeaders',
     fields: {
-      'x-api-key': mddocConstruct.constructObjectField({
+      'x-api-key': mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructString({
+        data: mfdocConstruct.constructString({
           description: 'The API key',
         }),
       }),
     },
   }),
-  responseHeaders: mddocConstruct.constructObject<{
+  responseHeaders: mfdocConstruct.constructObject<{
     'x-api-key': string;
   }>({
     name: 'GetUserResponseHeaders',
     fields: {
-      'x-api-key': mddocConstruct.constructObjectField({
+      'x-api-key': mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructString({
+        data: mfdocConstruct.constructString({
           description: 'The API key',
         }),
       }),
     },
   }),
-  responseBody: mddocConstruct.constructObject<{
+  responseBody: mfdocConstruct.constructObject<{
     user: {
       id: string;
     };
   }>({
     name: 'GetUserResponseBody',
     fields: {
-      user: mddocConstruct.constructObjectField({
+      user: mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructObject({
+        data: mfdocConstruct.constructObject({
           name: 'User',
           fields: {
-            id: mddocConstruct.constructObjectField({
+            id: mfdocConstruct.constructObjectField({
               required: true,
-              data: mddocConstruct.constructString({
+              data: mfdocConstruct.constructString({
                 description: 'The user id',
               }),
             }),
@@ -55,83 +55,83 @@ export const endpoint01 = mddocConstruct.constructHttpEndpointDefinition({
       }),
     },
   }),
-  pathParamaters: mddocConstruct.constructObject<{
+  pathParamaters: mfdocConstruct.constructObject<{
     userId: string;
   }>({
     name: 'GetUserPathParamaters',
     fields: {
-      userId: mddocConstruct.constructObjectField({
+      userId: mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructString({
+        data: mfdocConstruct.constructString({
           description: 'The user id',
         }),
       }),
     },
   }),
-  query: mddocConstruct.constructObject<{
+  query: mfdocConstruct.constructObject<{
     userId: string;
   }>({
     name: 'GetUserQuery',
     fields: {
-      userId: mddocConstruct.constructObjectField({
+      userId: mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructString({
+        data: mfdocConstruct.constructString({
           description: 'The user id',
         }),
       }),
     },
   }),
-  requestBody: mddocConstruct.constructObject<{
+  requestBody: mfdocConstruct.constructObject<{
     userId: string;
   }>({
     name: 'GetUserRequestBody',
     fields: {
-      userId: mddocConstruct.constructObjectField({
+      userId: mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructString({
+        data: mfdocConstruct.constructString({
           description: 'The user id',
         }),
       }),
     },
   }),
-  errorResponseHeaders: mddocConstruct.constructObject<{
+  errorResponseHeaders: mfdocConstruct.constructObject<{
     'Content-Type': string;
     'Content-Length': string;
   }>({
     name: 'GetUserErrorResponseHeaders',
     fields: {
-      'Content-Type': mddocConstruct.constructObjectField({
+      'Content-Type': mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructString({
+        data: mfdocConstruct.constructString({
           description: 'The API key',
         }),
       }),
-      'Content-Length': mddocConstruct.constructObjectField({
+      'Content-Length': mfdocConstruct.constructObjectField({
         required: true,
-        data: mddocConstruct.constructString({
+        data: mfdocConstruct.constructString({
           description: 'The content length',
         }),
       }),
     },
   }),
-  errorResponseBody: mddocConstruct.constructObject<{
+  errorResponseBody: mfdocConstruct.constructObject<{
     errors?: {
       message: string;
     }[];
   }>({
     name: 'GetUserErrorResponseBody',
     fields: {
-      errors: mddocConstruct.constructObjectField({
+      errors: mfdocConstruct.constructObjectField({
         required: false,
-        data: mddocConstruct.constructArray({
-          type: mddocConstruct.constructObject<{
+        data: mfdocConstruct.constructArray({
+          type: mfdocConstruct.constructObject<{
             message: string;
           }>({
             name: 'Error',
             fields: {
-              message: mddocConstruct.constructObjectField({
+              message: mfdocConstruct.constructObjectField({
                 required: true,
-                data: mddocConstruct.constructString({
+                data: mfdocConstruct.constructString({
                   description: 'The error message',
                 }),
               }),
