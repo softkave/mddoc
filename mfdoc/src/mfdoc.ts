@@ -101,7 +101,10 @@ export type ConvertToMfdocType<
     Not<IsStringEnum<Exclude<T, undefined>>> &
     Not<IsBoolean<Exclude<T, undefined>>>
 > extends false
-  ? MfdocFieldOrCombinationTypePrimitive<Array<ConvertToMfdocType<T, false>>>
+  ? // TODO: or combination not working properly, you can pass an empty types
+    // array and it will still be an or combination so type checking isn't
+    // working properly
+    MfdocFieldOrCombinationTypePrimitive<Array<ConvertToMfdocType<T, false>>>
   : T extends string
   ? MfdocFieldStringTypePrimitive
   : T extends number
@@ -116,6 +119,8 @@ export type ConvertToMfdocType<
   ? MfdocFieldBinaryTypePrimitive
   : T extends null
   ? MfdocFieldNullTypePrimitive
+  : T extends Date
+  ? MfdocFieldStringTypePrimitive
   : T extends AnyObject
   ? MfdocFieldObjectTypePrimitive<Exclude<T, undefined>>
   : MfdocFieldBaseTypePrimitive;

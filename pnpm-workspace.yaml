@@ -1,4 +1,4 @@
 packages:
   - mfdoc
   - examples/*
-  - base/*
+  - sdk-base/*

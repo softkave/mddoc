@@ -394,14 +394,8 @@ function generateEveryEndpointCode(
   > = {};
 
   endpoints.forEach(e1 => {
-    const pathname = e1.basePathname;
-    // pathname looks like /v1/agentToken/addAgentToken, which should yield 4
-    // parts, but pathSplit, removes empty strings, so we'll have ["v1",
-    // "agentToken", "addAgentToken"]. also filter out path params.
-    const rest = pathSplit({input: pathname}).filter(
-      p => !p.startsWith(':') && p.length > 0
-    );
-
+    const endpointName = e1.name;
+    const rest = pathSplit({input: endpointName}).filter(p => p.length > 0);
     assert(rest.length >= 2);
     const fnName = last(rest);
     const groupName = nth(rest, rest.length - 2);
@@ -436,7 +430,7 @@ function generateEveryEndpointCode(
   }
 
   function docBranch(
-    parentName: string,
+    parentName: string | undefined,
     ownName: string,
     branch: Record<string, any>
   ) {
@@ -446,15 +440,17 @@ function generateEveryEndpointCode(
       });
     }
 
-    doc.appendToClass(
-      `${ownName} = new ${upperFirst(ownName)}Endpoints(this.config, this);`,
-      `${upperFirst(parentName)}Endpoints`,
-      'MfdocEndpointsBase'
-    );
+    if (parentName) {
+      doc.appendToClass(
+        `${ownName} = new ${upperFirst(ownName)}Endpoints(this.config, this);`,
+        `${upperFirst(parentName)}Endpoints`,
+        'MfdocEndpointsBase'
+      );
+    }
   }
 
   for (const ownName in branchMap) {
-    docBranch('mfdoc', ownName, branchMap[ownName]);
+    docBranch(undefined, ownName, branchMap[ownName]);
   }
 }
 
