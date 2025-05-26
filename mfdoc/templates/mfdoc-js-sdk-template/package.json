@@ -16,7 +16,7 @@
   "keywords": [],
   "scripts": {
     "lint": "gts lint",
-    "clean": "gts clean",
+    "clean": "gts clean && rm -f tsconfig.tsbuildinfo",
     "compile": "npm run clean && tsc",
     "fix": "gts fix",
     "pretty": "prettier --write .",
@@ -24,9 +24,9 @@
     "posttest": "npm run lint",
     "test": "env-cmd -f \".env.test\" vitest --config=./vitest.config.ts",
     "test:browser": "env-cmd -f \".env.test\" vitest --config=./vitest.browser.config.ts",
-    "publish:npm": "npm run compile && npm publish",
-    "publish:local": "npm run compile && yalc publish",
-    "show:packlist": "npm run compile && npm pack --dry-run"
+    "publish:npm": "npm run clean && tsc && npm publish",
+    "publish:local": "npm run clean && tsc && yalc publish",
+    "show:packlist": "npm run clean && tsc && npm pack --dry-run"
   },
   "engines": {
     "node": ">=13"

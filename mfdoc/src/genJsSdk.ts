@@ -509,7 +509,7 @@ export async function genJsSdk(params: {
     'outputDir must be a valid npm package'
   );
 
-  const endpointsDir = path.normalize(outputDir + '/src/http');
+  const endpointsDir = path.normalize(outputDir + '/src/endpoints');
 
   const typesFilename = `${filenamePrefix}Types`;
   const typesFilenameWithExt = `${typesFilename}.ts`;

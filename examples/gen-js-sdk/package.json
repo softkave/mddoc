@@ -13,7 +13,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "gts lint",
-    "clean": "gts clean",
+    "clean": "gts clean && rm -f tsconfig.tsbuildinfo",
     "compile": "tsc",
     "fix": "gts fix",
     "pretest": "npm run compile",
