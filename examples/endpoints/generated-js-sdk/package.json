@@ -1,5 +1,5 @@
 {
-  "name": "mfdoc-js-sdk-template",
+  "name": "generated-js-sdk",
   "version": "0.1.0",
   "description": "mfdoc js sdk template",
   "type": "module",
@@ -19,15 +19,14 @@
     "clean": "gts clean && rm -f tsconfig.tsbuildinfo",
     "compile": "npm run clean && tsc",
     "fix": "gts fix",
+    "pretty": "prettier --write",
     "pretest": "npm run compile",
     "posttest": "npm run lint",
     "test": "env-cmd -f \".env.test\" vitest --config=./vitest.config.ts",
     "test:browser": "env-cmd -f \".env.test\" vitest --config=./vitest.browser.config.ts",
     "publish:npm": "npm run clean && tsc && npm publish",
-    "publish:local:yalc": "npm run clean && tsc && yalc publish",
-    "publish:local:pnpm": "npm run clean && tsc && pnpm link --global",
-    "show:packlist": "npm run clean && tsc && npm pack --dry-run",
-    "pretty": "prettier --write"
+    "publish:local": "npm run clean && tsc && yalc publish",
+    "show:packlist": "npm run clean && tsc && npm pack --dry-run"
   },
   "engines": {
     "node": ">=13"

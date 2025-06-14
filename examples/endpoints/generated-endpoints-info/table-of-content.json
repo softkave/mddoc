@@ -1,0 +1,19 @@
+[
+    {
+        "basename": "user",
+        "names": [
+            "user"
+        ],
+        "children": {
+            "info__get": {
+                "basename": "info__get",
+                "filepath": "user/info__get.json",
+                "names": [
+                    "user",
+                    "info__get"
+                ],
+                "children": {}
+            }
+        }
+    }
+]

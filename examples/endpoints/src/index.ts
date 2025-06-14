@@ -1,9 +1,8 @@
 import {mfdocConstruct, MfdocHttpEndpointMethod} from 'mfdoc';
 
 export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
-  name: 'get-user',
   method: MfdocHttpEndpointMethod.Get,
-  basePathname: '/user/:userId/info',
+  path: '/user/:userId/info',
   description: 'Get user',
   tags: ['user'],
   requestHeaders: mfdocConstruct.constructObject<{

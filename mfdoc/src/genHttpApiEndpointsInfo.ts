@@ -1,5 +1,6 @@
+import assert from 'assert';
 import fse from 'fs-extra';
-import {forEach} from 'lodash-es';
+import {forEach, get, last, set} from 'lodash-es';
 import {posix} from 'path';
 import {getEndpointsFromSrcPath} from './getEndpointsFromSrcPath.js';
 import {kMfdocHttpHeaderItems} from './headers.js';
@@ -8,7 +9,15 @@ import {
   MfdocHttpEndpointDefinitionTypePrimitive,
 } from './mfdoc.js';
 import {kMfdocHttpResponseItems} from './response.js';
-import {filterEndpointsByTags} from './utils.js';
+import {filterEndpointsByTags, getEndpointNames} from './utils.js';
+
+export interface MfdocEndpointsTableOfContent {
+  filepath?: string;
+  /** basename with method if item is an endpoint */
+  basename: string;
+  names: string[];
+  children: Record<string, MfdocEndpointsTableOfContent>;
+}
 
 function generateEndpointInfoFromEndpoints(params: {
   endpoints: MfdocHttpEndpointDefinitionTypePrimitive[];
@@ -42,7 +51,60 @@ function generateEndpointInfoFromEndpoints(params: {
 
 async function writeEndpointInfoToFile(endpointPath: string, info: string) {
   await fse.ensureFile(endpointPath);
+  console.log('endpoint:', endpointPath);
   return fse.writeFile(endpointPath, info, {encoding: 'utf-8'});
+}
+
+async function writeTableOfContentToFile(
+  tableOfContent: MfdocEndpointsTableOfContent[],
+  outputPath: string,
+  filename: string
+) {
+  const tableOfContentPath = posix.normalize(outputPath + '/' + filename);
+  await fse.ensureFile(tableOfContentPath);
+  console.log('table of content:', tableOfContentPath);
+  return fse.writeFile(
+    tableOfContentPath,
+    JSON.stringify(tableOfContent, /** replacer */ undefined, /** spaces */ 4),
+    {encoding: 'utf-8'}
+  );
+}
+
+function setEndpointInTableOfContent(params: {
+  tableOfContent: MfdocEndpointsTableOfContent;
+  endpointNames: string[];
+  endpointFilepath: string | undefined;
+  backfillParents: boolean;
+}) {
+  const {tableOfContent, endpointNames, endpointFilepath, backfillParents} =
+    params;
+
+  const p = endpointNames.join('.children.');
+  const basename = last(endpointNames);
+  assert(basename, 'basename is required');
+
+  const existing = get(tableOfContent.children, p);
+  const item: MfdocEndpointsTableOfContent = {
+    basename,
+    filepath: endpointFilepath,
+    names: endpointNames,
+    children: existing?.children ?? {},
+  };
+
+  set(tableOfContent.children, p, item);
+
+  if (backfillParents) {
+    endpointNames.forEach((name, index) => {
+      if (index < endpointNames.length - 1) {
+        setEndpointInTableOfContent({
+          tableOfContent,
+          endpointNames: endpointNames.slice(0, index + 1),
+          endpointFilepath: undefined,
+          backfillParents: false,
+        });
+      }
+    });
+  }
 }
 
 export async function genHttpApiEndpointsInfo(params: {
@@ -53,20 +115,39 @@ export async function genHttpApiEndpointsInfo(params: {
   const {endpoints, tags, outputPath} = params;
   const infoMap = generateEndpointInfoFromEndpoints({endpoints, tags});
   const promises: Promise<any>[] = [];
+  const tableOfContent: MfdocEndpointsTableOfContent = {
+    basename: '',
+    names: [],
+    children: {},
+  };
 
   await fse.remove(outputPath);
   infoMap.forEach((info, endpoint) => {
-    const pathname = endpoint.name
-      .split('/')
-      .filter(p => !p.startsWith(':'))
-      .join('/');
+    const names = getEndpointNames(
+      endpoint as MfdocHttpEndpointDefinitionTypePrimitive
+    );
     const method = endpoint.method;
-    const filename = `${pathname}__${method}.json`;
-    const endpointPath = posix.normalize(outputPath + '/' + filename);
+    const namesWithMethod = [
+      ...names.slice(0, -1),
+      `${names[names.length - 1]}__${method}`,
+    ];
+    const filepath = `${namesWithMethod.join('/')}.json`;
+    const endpointPath = posix.normalize(outputPath + '/' + filepath);
     promises.push(writeEndpointInfoToFile(endpointPath, info));
+    setEndpointInTableOfContent({
+      tableOfContent,
+      endpointNames: namesWithMethod,
+      endpointFilepath: filepath,
+      backfillParents: true,
+    });
   });
 
-  return Promise.all(promises);
+  await Promise.all(promises);
+  await writeTableOfContentToFile(
+    Object.values(tableOfContent.children),
+    outputPath,
+    'table-of-content.json'
+  );
 }
 
 export async function genHttpApiEndpointsInfoCmd(params: {
@@ -76,5 +157,14 @@ export async function genHttpApiEndpointsInfoCmd(params: {
 }) {
   const {srcPath, tags, outputPath} = params;
   const endpoints = await getEndpointsFromSrcPath({srcPath});
-  await genHttpApiEndpointsInfo({endpoints, tags, outputPath});
+  const filteredEndpoints = filterEndpointsByTags(endpoints, tags);
+  console.log('endpoints count', filteredEndpoints.length);
+  console.log('tags', tags);
+  console.log('outputPath', outputPath);
+  console.log('--------------------------------');
+  await genHttpApiEndpointsInfo({
+    endpoints: filteredEndpoints,
+    tags,
+    outputPath,
+  });
 }

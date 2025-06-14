@@ -1,6 +1,5 @@
 export * from './findAndReplace.js';
 export * from './genHttpApiEndpointsInfo.js';
-export * from './genHttpApiTableOfContent.js';
 export * from './genJsSdk.js';
 export * from './headers.js';
 export * from './mfdoc.js';

@@ -2,6 +2,7 @@ import {execSync} from 'child_process';
 import fse from 'fs-extra';
 import path from 'path';
 import {
+  addScriptToPackageJson,
   hasPackageJson,
   InstallScriptProvider,
   kInstallScripts,
@@ -14,24 +15,16 @@ import {
  *
  * generate from scratch
  * - clone from template
+ * - install js sdk base
  * - update package.json
  *   - name
  *
  * update existing
- * - nothing to do
+ * - ensure js sdk base is installed
+ * - add "pretty" script to package.json
+ * - ensure "AbstractSdkEndpoints", "getDefaultSdkConfig", "SdkConfig" are
+ *   present in the src/endpoints folder
  */
-
-async function hasMfdocJsSdkBase(params: {outputPath: string}) {
-  const {outputPath} = params;
-  return (
-    (await fse.exists(
-      path.join(outputPath, 'node_modules', 'mfdoc-js-sdk-base')
-    )) &&
-    (
-      await fse.stat(path.join(outputPath, 'node_modules', 'mfdoc-js-sdk-base'))
-    ).isDirectory()
-  );
-}
 
 async function installMfdocJsSdkBase(params: {
   outputPath: string;
@@ -73,6 +66,42 @@ async function cloneFromTemplate(params: {outputPath: string}) {
   );
 }
 
+async function ensureEndpointsFolder(params: {outputPath: string}) {
+  const {outputPath} = params;
+  await fse.ensureDir(path.join(outputPath, 'src', 'endpoints'));
+
+  const filesToCopy = [
+    {name: 'AbstractSdkEndpoints.ts', overwrite: true},
+    {name: 'getDefaultSdkConfig.ts', overwrite: false},
+    {name: 'SdkConfig.ts', overwrite: false},
+  ];
+
+  for (const file of filesToCopy) {
+    const srcPath = path.join(
+      import.meta.dirname,
+      '..',
+      'templates',
+      'mfdoc-js-sdk-template',
+      'src',
+      'endpoints',
+      file.name
+    );
+    const destPath = path.join(outputPath, 'src', 'endpoints', file.name);
+    if (await fse.pathExists(destPath)) {
+      if (file.overwrite) {
+        await fse.remove(destPath);
+      } else {
+        continue;
+      }
+    }
+    console.log('copying', srcPath, 'to', destPath);
+    await fse.copy(srcPath, destPath, {
+      overwrite: file.overwrite,
+      errorOnExist: false,
+    });
+  }
+}
+
 export async function setupJsSdk(params: {
   outputPath: string;
   name: string;
@@ -80,16 +109,30 @@ export async function setupJsSdk(params: {
 }) {
   const {outputPath, name, provider = 'npm'} = params;
 
-  if (await hasPackageJson({outputPath})) {
-    if (await hasMfdocJsSdkBase({outputPath})) {
-      return;
-    }
+  console.log('name', name);
+  console.log('provider', provider);
+  console.log('outputPath', outputPath);
+  console.log('--------------------------------');
 
+  if (await hasPackageJson({outputPath})) {
+    console.log('updating existing js sdk');
+    console.log('installing mfdoc-js-sdk-base');
     await installMfdocJsSdkBase({outputPath, provider});
+    console.log('adding "pretty" script to package.json');
+    await addScriptToPackageJson({
+      outputPath,
+      scriptName: 'pretty',
+      scriptValue: 'prettier --write',
+    });
+    console.log('ensuring endpoints folder');
+    await ensureEndpointsFolder({outputPath});
     return;
   }
 
+  console.log('cloning from template');
   await cloneFromTemplate({outputPath});
+  console.log('updating package.json name');
   await updatePackageJsonName({outputPath, name});
+  console.log('installing mfdoc-js-sdk-base');
   await installMfdocJsSdkBase({outputPath, provider});
 }

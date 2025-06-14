@@ -1,9 +1,18 @@
 import assert from 'assert';
 import {execSync} from 'child_process';
 import fse from 'fs-extra';
-import {compact, forEach, last, nth, set, upperFirst} from 'lodash-es';
+import {
+  camelCase,
+  compact,
+  forEach,
+  last,
+  nth,
+  set,
+  upperFirst,
+} from 'lodash-es';
 import path from 'path';
 import {AnyObject, isObjectEmpty, pathSplit} from 'softkave-js-utils';
+import {addCodeLinesToIndex} from './codeHelpers.js';
 import {Doc} from './doc.js';
 import {getEndpointsFromSrcPath} from './getEndpointsFromSrcPath.js';
 import {
@@ -33,7 +42,11 @@ import {
   MfdocHttpEndpointDefinitionTypePrimitive,
   objectHasRequiredFields,
 } from './mfdoc.js';
-import {filterEndpointsByTags, hasPackageJson} from './utils.js';
+import {
+  filterEndpointsByTags,
+  getEndpointNames,
+  hasPackageJson,
+} from './utils.js';
 
 function getEnumType(doc: Doc, item: MfdocFieldStringTypePrimitive) {
   const name = item.enumName;
@@ -366,12 +379,12 @@ function generateEndpointCode(
     ${mapping.length ? `const mapping = ${mapping} as const` : ''}
     return this.execute${isBinaryResponse ? 'Raw' : 'Json'}({
       ${bodyText.join('')}
-      path: "${endpoint.basePathname}",
+      path: "${endpoint.path}",
       method: "${endpoint.method.toUpperCase()}",
     }, opts, ${mapping.length ? 'mapping' : ''});
   }`;
 
-  doc.appendToClass(text, className, 'MfdocEndpointsBase');
+  doc.appendToClass(text, className, 'AbstractSdkEndpoints');
 }
 
 function generateEveryEndpointCode(
@@ -393,25 +406,26 @@ function generateEveryEndpointCode(
     Record<string, Record<string, /** Record<string, any...> */ any>>
   > = {};
 
-  endpoints.forEach(e1 => {
-    const endpointName = e1.name;
-    const rest = pathSplit({input: endpointName}).filter(p => p.length > 0);
-    assert(rest.length >= 2);
-    const fnName = last(rest);
-    const groupName = nth(rest, rest.length - 2);
+  endpoints.forEach(nextEndpoint => {
+    const names = getEndpointNames(nextEndpoint).map(name => camelCase(name));
+    assert(
+      names.length >= 2,
+      `Endpoint name must have at least 2 parts: ${names}`
+    );
+    const fnName = last(names);
+    const groupName = nth(names, names.length - 2);
     const className = `${upperFirst(groupName)}Endpoints`;
-    const types = getTypesFromEndpoint(e1);
+    const types = getTypesFromEndpoint(nextEndpoint);
     const key = `${className}.${fnName}`;
-    set(leafEndpointsMap, key, {types, endpoint: e1});
+    set(leafEndpointsMap, key, {types, endpoint: nextEndpoint});
 
-    const branches = rest.slice(0, -1);
+    const branches = names.slice(0, -1);
     const branchesKey = branches.join('.');
     set(branchMap, branchesKey, {});
   });
 
   doc.appendImport(
     [
-      'MfdocEndpointsBase',
       'type MfdocEndpointResultWithBinaryResponse',
       'type MfdocEndpointOpts',
       'type MfdocEndpointDownloadBinaryOpts',
@@ -419,6 +433,7 @@ function generateEveryEndpointCode(
     ],
     'mfdoc-js-sdk-base'
   );
+  doc.appendImport(['AbstractSdkEndpoints'], './AbstractSdkEndpoints.js');
 
   for (const groupName in leafEndpointsMap) {
     const group = leafEndpointsMap[groupName];
@@ -444,7 +459,7 @@ function generateEveryEndpointCode(
       doc.appendToClass(
         `${ownName} = new ${upperFirst(ownName)}Endpoints(this.config, this);`,
         `${upperFirst(parentName)}Endpoints`,
-        'MfdocEndpointsBase'
+        'AbstractSdkEndpoints'
       );
     }
   }
@@ -460,7 +475,7 @@ function uniqEnpoints(
   const endpointNameMap: Record<string, string> = {};
 
   endpoints.forEach(e1 => {
-    const names = pathSplit({input: e1.basePathname});
+    const names = pathSplit({input: e1.path});
     const fnName = last(names);
     const method = e1.method.toLowerCase();
     const key = `${fnName}__${method}`;
@@ -468,7 +483,7 @@ function uniqEnpoints(
   });
 
   return endpoints.filter(e1 => {
-    const names = pathSplit({input: e1.basePathname});
+    const names = pathSplit({input: e1.path});
     const fnName = last(names);
     const method = e1.method.toLowerCase();
     const ownKey = `${fnName}__${method}`;
@@ -483,33 +498,19 @@ function uniqEnpoints(
   });
 }
 
-async function addCodeLinesToIndex(params: {
-  indexPath: string;
-  codeLines: string[];
-}) {
-  const {indexPath, codeLines} = params;
-  const indexText = await fse.readFile(indexPath, {encoding: 'utf-8'});
-  const codeLinesNotFound = codeLines.filter(line => !indexText.includes(line));
-  if (codeLinesNotFound.length) {
-    await fse.writeFile(indexPath, indexText + codeLinesNotFound.join('\n'), {
-      encoding: 'utf-8',
-    });
-  }
-}
-
 export async function genJsSdk(params: {
   endpoints: MfdocHttpEndpointDefinitionTypePrimitive[];
   filenamePrefix: string;
-  tags: string[];
   outputDir: string;
+  endpointsPath: string;
 }) {
-  const {endpoints, filenamePrefix, tags, outputDir} = params;
+  const {endpoints, filenamePrefix, outputDir, endpointsPath} = params;
   assert(
     await hasPackageJson({outputPath: outputDir}),
     'outputDir must be a valid npm package'
   );
 
-  const endpointsDir = path.normalize(outputDir + '/src/endpoints');
+  const endpointsDir = path.join(outputDir, endpointsPath);
 
   const typesFilename = `${filenamePrefix}Types`;
   const typesFilenameWithExt = `${typesFilename}.ts`;
@@ -526,14 +527,13 @@ export async function genJsSdk(params: {
   const typesDoc = new Doc({genTypesFilepath: `./${typesFilenameWithExt}`});
   const codesDoc = new Doc({genTypesFilepath: `./${typesFilenameWithExt}`});
 
-  const httpEndpoints = filterEndpointsByTags(endpoints, tags);
-  forEach(httpEndpoints, e1 => {
+  forEach(endpoints, e1 => {
     if (e1) {
       documentTypesFromEndpoint(typesDoc, e1);
     }
   });
 
-  const uniqHttpEndpoints = uniqEnpoints(httpEndpoints);
+  const uniqHttpEndpoints = uniqEnpoints(endpoints);
   generateEveryEndpointCode(codesDoc, uniqHttpEndpoints);
 
   fse.ensureFileSync(typesFilepath);
@@ -548,13 +548,11 @@ export async function genJsSdk(params: {
     codeLines: [
       `export * from './${typesFilename}.js';`,
       `export * from './${codesFilename}.js';`,
+      `export type {SdkConfig} from './SdkConfig.js';`,
     ],
   });
 
-  // execSync(`npx code-migration-helpers add-ext -f="${endpointsDir}"`, {
-  //   stdio: 'inherit',
-  // });
-  execSync(`cd ${outputDir} && npm run pretty`, {
+  execSync(`cd ${outputDir} && npm run pretty ${endpointsPath}`, {
     stdio: 'inherit',
   });
 }
@@ -564,13 +562,22 @@ export async function genJsSdkCmd(params: {
   outputPath: string;
   filenamePrefix: string;
   tags: string[];
+  endpointsPath: string;
 }) {
-  const {srcPath, filenamePrefix, tags, outputPath} = params;
+  const {srcPath, filenamePrefix, tags, outputPath, endpointsPath} = params;
+  console.log(
+    "make sure you have run 'setup-js-sdk' before running this command"
+  );
   const endpoints = await getEndpointsFromSrcPath({srcPath});
+  const filteredEndpoints = filterEndpointsByTags(endpoints, tags);
+  console.log('endpoints count', filteredEndpoints.length);
+  console.log('tags', tags);
+  console.log('outputPath', outputPath);
+  console.log('--------------------------------');
   await genJsSdk({
-    endpoints,
+    endpoints: filteredEndpoints,
     filenamePrefix,
-    tags,
     outputDir: outputPath,
+    endpointsPath,
   });
 }

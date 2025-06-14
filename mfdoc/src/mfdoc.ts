@@ -216,7 +216,7 @@ export interface MfdocHttpEndpointDefinitionTypePrimitive<
   TResponseBody extends AnyObject = AnyObject,
   TSdkParams extends AnyObject = TRequestBody
 > extends MfdocFieldIdPrimitive {
-  basePathname: string;
+  path: string;
   method: MfdocHttpEndpointMethod;
   pathParamaters?: MfdocFieldObjectTypePrimitive<TPathParameters>;
   query?: MfdocFieldObjectTypePrimitive<TQuery>;
@@ -235,7 +235,7 @@ export interface MfdocHttpEndpointDefinitionTypePrimitive<
     TQuery,
     TRequestBody
   >;
-  name: string;
+  name?: string;
   description?: string;
   tags?: string[];
 
@@ -366,9 +366,30 @@ function constructObject<T extends object>(
   };
 }
 
-function constructSdkParamsBody(
-  params: OmitFrom<MfdocSdkParamsBodyTypePrimitive, '__id'>
-): MfdocSdkParamsBodyTypePrimitive {
+function constructSdkParamsBody<
+  T extends object = any,
+  TRequestHeaders extends object = any,
+  TPathParameters extends object = any,
+  TQuery extends object = any,
+  TRequestBody extends object = any
+>(
+  params: OmitFrom<
+    MfdocSdkParamsBodyTypePrimitive<
+      T,
+      TRequestHeaders,
+      TPathParameters,
+      TQuery,
+      TRequestBody
+    >,
+    '__id'
+  >
+): MfdocSdkParamsBodyTypePrimitive<
+  T,
+  TRequestHeaders,
+  TPathParameters,
+  TQuery,
+  TRequestBody
+> {
   return {
     __id: kMfdocFieldTypes.SdkParamsBody,
     ...params,

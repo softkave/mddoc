@@ -1,0 +1,152 @@
+{
+    "__id": "HttpEndpointDefinition",
+    "method": "get",
+    "path": "/user/:userId/info",
+    "description": "Get user",
+    "tags": [
+        "user"
+    ],
+    "requestHeaders": {
+        "__id": "FieldObject",
+        "name": "GetUserRequestHeaders",
+        "fields": {
+            "x-api-key": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldString",
+                    "description": "The API key"
+                }
+            }
+        }
+    },
+    "responseHeaders": {
+        "__id": "FieldObject",
+        "name": "GetUserResponseHeaders",
+        "fields": {
+            "x-api-key": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldString",
+                    "description": "The API key"
+                }
+            }
+        }
+    },
+    "responseBody": {
+        "__id": "FieldObject",
+        "name": "GetUserResponseBody",
+        "fields": {
+            "user": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldObject",
+                    "name": "User",
+                    "fields": {
+                        "id": {
+                            "__id": "FieldObjectField",
+                            "required": true,
+                            "data": {
+                                "__id": "FieldString",
+                                "description": "The user id"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "pathParamaters": {
+        "__id": "FieldObject",
+        "name": "GetUserPathParamaters",
+        "fields": {
+            "userId": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldString",
+                    "description": "The user id"
+                }
+            }
+        }
+    },
+    "query": {
+        "__id": "FieldObject",
+        "name": "GetUserQuery",
+        "fields": {
+            "userId": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldString",
+                    "description": "The user id"
+                }
+            }
+        }
+    },
+    "requestBody": {
+        "__id": "FieldObject",
+        "name": "GetUserRequestBody",
+        "fields": {
+            "userId": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldString",
+                    "description": "The user id"
+                }
+            }
+        }
+    },
+    "errorResponseHeaders": {
+        "__id": "FieldObject",
+        "name": "GetUserErrorResponseHeaders",
+        "fields": {
+            "Content-Type": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldString",
+                    "description": "The API key"
+                }
+            },
+            "Content-Length": {
+                "__id": "FieldObjectField",
+                "required": true,
+                "data": {
+                    "__id": "FieldString",
+                    "description": "The content length"
+                }
+            }
+        }
+    },
+    "errorResponseBody": {
+        "__id": "FieldObject",
+        "name": "GetUserErrorResponseBody",
+        "fields": {
+            "errors": {
+                "__id": "FieldObjectField",
+                "required": false,
+                "data": {
+                    "__id": "FieldArray",
+                    "type": {
+                        "__id": "FieldObject",
+                        "name": "Error",
+                        "fields": {
+                            "message": {
+                                "__id": "FieldObjectField",
+                                "required": true,
+                                "data": {
+                                    "__id": "FieldString",
+                                    "description": "The error message"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

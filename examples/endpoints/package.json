@@ -1,5 +1,5 @@
 {
-  "name": "mfdoc-examples-gen-js-sdk",
+  "name": "mfdoc-examples-endpoints",
   "version": "0.1.0",
   "description": "Example of using mfdoc to generate a JS SDK",
   "type": "module",
@@ -19,10 +19,12 @@
     "pretest": "npm run compile",
     "posttest": "npm run lint"
   },
+  "dependencies": {
+    "mfdoc": "workspace:*"
+  },
   "devDependencies": {
     "gts": "^6.0.2",
     "typescript": "^5.6.3",
-    "@types/node": "^22.7.5",
-    "mfdoc": "workspace:*"
+    "@types/node": "^22.7.5"
   }
 }
