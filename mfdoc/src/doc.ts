@@ -1,4 +1,5 @@
 import {uniq} from 'lodash-es';
+import {stringToJsDoc} from './utils.js';
 
 export class Doc {
   protected disclaimer =
@@ -14,20 +15,16 @@ export class Doc {
   > = {};
   protected classes: Record<
     string,
-    {entries: string[]; name: string; extendsName?: string}
+    {entries: string[]; name: string; extendsName?: string; comment?: string}
   > = {};
 
   generatedTypeCache: Map<string, boolean> = new Map();
 
   constructor(protected props: {genTypesFilepath: string}) {}
 
-  appendType(typeText: string) {
-    this.typesText += typeText + '\n';
-    return this;
-  }
-
-  appendEndpoint(endpoint: string) {
-    this.endpointsText += endpoint + '\n';
+  appendToType(typeText: string, comment?: string) {
+    const jsDoc = stringToJsDoc(comment);
+    this.typesText += (jsDoc ? jsDoc + '\n' : '') + typeText + '\n';
     return this;
   }
 
@@ -69,11 +66,16 @@ export class Doc {
     );
   }
 
-  appendToClass(entry: string, name: string, extendsName?: string) {
+  appendToClass(
+    entry: string,
+    name: string,
+    extendsName?: string,
+    comment?: string
+  ) {
     let classEntry = this.classes[name];
 
     if (!classEntry) {
-      classEntry = {name, extendsName, entries: [entry]};
+      classEntry = {name, extendsName, entries: [entry], comment};
       this.classes[name] = classEntry;
     } else {
       if (extendsName && extendsName !== classEntry.extendsName) {
@@ -128,9 +130,13 @@ export class Doc {
     let classesText = '';
 
     for (const name in this.classes) {
-      const {entries, extendsName} = this.classes[name];
+      const {entries, extendsName, comment} = this.classes[name];
       const extendsText = extendsName ? ` extends ${extendsName}` : '';
       classesText += `export class ${name}${extendsText} {\n`;
+      if (comment) {
+        const jsDoc = stringToJsDoc(comment);
+        classesText += `${jsDoc ? jsDoc + '\n' : ''}`;
+      }
       entries.forEach(fieldEntry => {
         classesText += `  ${fieldEntry}\n`;
       });

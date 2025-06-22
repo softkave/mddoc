@@ -1,6 +1,6 @@
 {
   "name": "mfdoc",
-  "version": "0.2.1",
+  "version": "0.4.0",
   "description": "Auto generate JS SDK and HTTP API documentation",
   "author": {
     "email": "ywordk@gmail.com",
@@ -23,6 +23,16 @@
       "types": "./build/src/index.d.ts",
       "import": "./build/src/index.js",
       "default": "./build/src/index.js"
+    },
+    "./mfdoc-core": {
+      "types": "./build/src/mfdoc.d.ts",
+      "import": "./build/src/mfdoc.js",
+      "default": "./build/src/mfdoc.js"
+    },
+    "./endpointInfo.d.ts": {
+      "types": "./build/src/endpointInfo.d.ts",
+      "import": "./build/src/endpointInfo.js",
+      "default": "./build/src/endpointInfo.js"
     }
   },
   "bin": "build/src/bin/main.js",
@@ -71,7 +81,6 @@
     "commander": "^14.0.0",
     "fs-extra": "^11.3.0",
     "lodash-es": "^4.17.21",
-    "mfdoc": "file:.yalc/mfdoc",
     "softkave-js-utils": "^0.15.0",
     "tsx": "^4.19.4",
     "type-fest": "^4.37.0",

@@ -22,8 +22,8 @@ import {
  * update existing
  * - ensure js sdk base is installed
  * - add "pretty" script to package.json
- * - ensure "AbstractSdkEndpoints", "getDefaultSdkConfig", "SdkConfig" are
- *   present in the src/endpoints folder
+ * - ensure "AbstractSdkEndpoints", "getDefaultSdkConfig", "SdkConfig",
+ *   "endpointsIndex" are present in the src/endpoints folder
  */
 
 async function installMfdocJsSdkBase(params: {
@@ -31,7 +31,8 @@ async function installMfdocJsSdkBase(params: {
   provider?: InstallScriptProvider;
 }) {
   const {outputPath, provider = 'npm'} = params;
-  execSync(`${kInstallScripts[provider]('mfdoc-js-sdk-base')}`, {
+  const version = 'latest';
+  execSync(`${kInstallScripts[provider]('mfdoc-js-sdk-base@' + version)}`, {
     cwd: outputPath,
     stdio: 'inherit',
   });
@@ -74,6 +75,7 @@ async function ensureEndpointsFolder(params: {outputPath: string}) {
     {name: 'AbstractSdkEndpoints.ts', overwrite: true},
     {name: 'getDefaultSdkConfig.ts', overwrite: false},
     {name: 'SdkConfig.ts', overwrite: false},
+    {name: 'endpointsIndex.ts', overwrite: true},
   ];
 
   for (const file of filesToCopy) {

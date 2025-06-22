@@ -1,1 +1,1 @@
-// content is auto-generated, do not modify
+export * from './endpointsIndex.js';

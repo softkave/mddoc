@@ -14,6 +14,9 @@ import {
 } from './publicTypes.js';
 
 export class UserEndpoints extends AbstractSdkEndpoints {
+  /**
+   * Get user info
+   */
   info = async (
     props: GetUserRequestBody,
     opts?: MfdocEndpointOpts,

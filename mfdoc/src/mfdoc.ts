@@ -1,4 +1,4 @@
-import {
+import type {
   AnyFn,
   AnyObject,
   IsBoolean,
@@ -7,10 +7,10 @@ import {
   Not,
   OmitFrom,
 } from 'softkave-js-utils';
-import {Readable} from 'stream';
-import {IsNever, OptionalKeysOf, ValueOf} from 'type-fest';
-import {HttpEndpointResponseHeaders_ContentType_ContentLength} from './headers.js';
-import {BaseEndpointResult} from './types.js';
+import type {Readable} from 'stream';
+import type {IsNever, OptionalKeysOf, ValueOf} from 'type-fest';
+import type {HttpEndpointResponseHeaders_ContentType_ContentLength} from './headers.js';
+import type {BaseEndpointResult} from './types.js';
 
 export const kMfdocFieldTypes = {
   Base: 'FieldBase',
@@ -28,19 +28,19 @@ export const kMfdocFieldTypes = {
   SdkParamsBody: 'SdkParamsBody',
   HttpEndpointMultipartFormdata: 'HttpEndpointMultipartFormdata',
   HttpEndpointDefinition: 'HttpEndpointDefinition',
+  CustomType: 'CustomType',
 } as const;
 
 export type MfdocFieldType = ValueOf<typeof kMfdocFieldTypes>;
 
-export interface MfdocFieldIdPrimitive {
+export interface MfdocFieldBaseTypePrimitive {
+  description?: string;
+  example?: unknown;
   __id: string;
 }
 
-export interface MfdocFieldBaseTypePrimitive extends MfdocFieldIdPrimitive {
-  description?: string;
-}
-
-export interface MfdocFieldStringTypePrimitive extends MfdocFieldIdPrimitive {
+export interface MfdocFieldStringTypePrimitive
+  extends MfdocFieldBaseTypePrimitive {
   example?: string;
   valid?: string[];
   min?: number;
@@ -49,7 +49,8 @@ export interface MfdocFieldStringTypePrimitive extends MfdocFieldIdPrimitive {
   description?: string;
 }
 
-export interface MfdocFieldNumberTypePrimitive extends MfdocFieldIdPrimitive {
+export interface MfdocFieldNumberTypePrimitive
+  extends MfdocFieldBaseTypePrimitive {
   example?: number;
   integer?: boolean;
   min?: number;
@@ -57,26 +58,30 @@ export interface MfdocFieldNumberTypePrimitive extends MfdocFieldIdPrimitive {
   description?: string;
 }
 
-export interface MfdocFieldBooleanTypePrimitive extends MfdocFieldIdPrimitive {
+export interface MfdocFieldBooleanTypePrimitive
+  extends MfdocFieldBaseTypePrimitive {
   example?: boolean;
   description?: string;
 }
 
-export interface MfdocFieldNullTypePrimitive extends MfdocFieldIdPrimitive {
+export interface MfdocFieldNullTypePrimitive
+  extends MfdocFieldBaseTypePrimitive {
   description?: string;
 }
 
 export interface MfdocFieldUndefinedTypePrimitive
-  extends MfdocFieldIdPrimitive {
+  extends MfdocFieldBaseTypePrimitive {
   description?: string;
 }
 
-export interface MfdocFieldDateTypePrimitive extends MfdocFieldIdPrimitive {
+export interface MfdocFieldDateTypePrimitive
+  extends MfdocFieldBaseTypePrimitive {
   example?: string;
   description?: string;
 }
 
-export interface MfdocFieldArrayTypePrimitive<T> extends MfdocFieldIdPrimitive {
+export interface MfdocFieldArrayTypePrimitive<T>
+  extends MfdocFieldBaseTypePrimitive {
   type?: ConvertToMfdocType<T>;
   min?: number;
   max?: number;
@@ -86,7 +91,7 @@ export interface MfdocFieldArrayTypePrimitive<T> extends MfdocFieldIdPrimitive {
 export interface MfdocFieldObjectFieldTypePrimitive<
   T,
   TRequired extends boolean = any
-> extends MfdocFieldIdPrimitive {
+> extends MfdocFieldBaseTypePrimitive {
   required: TRequired;
   data: ConvertToMfdocType<T>;
   description?: string;
@@ -132,7 +137,7 @@ export type MfdocFieldObjectFieldsMap<T extends object> = Required<{
 }>;
 
 export interface MfdocFieldObjectTypePrimitive<T extends object>
-  extends MfdocFieldIdPrimitive {
+  extends MfdocFieldBaseTypePrimitive {
   name: string;
   fields?: MfdocFieldObjectFieldsMap<T>;
   description?: string;
@@ -140,12 +145,13 @@ export interface MfdocFieldObjectTypePrimitive<T extends object>
 
 export interface MfdocFieldOrCombinationTypePrimitive<
   T extends MfdocFieldBaseTypePrimitive[] = MfdocFieldBaseTypePrimitive[]
-> extends MfdocFieldIdPrimitive {
+> extends MfdocFieldBaseTypePrimitive {
   types: T;
   description?: string;
 }
 
-export interface MfdocFieldBinaryTypePrimitive extends MfdocFieldIdPrimitive {
+export interface MfdocFieldBinaryTypePrimitive
+  extends MfdocFieldBaseTypePrimitive {
   min?: number;
   max?: number;
   description?: string;
@@ -188,7 +194,7 @@ export interface MfdocSdkParamsBodyTypePrimitive<
   TPathParameters extends object = any,
   TQuery extends object = any,
   TRequestBody extends object = any
-> extends MfdocFieldIdPrimitive {
+> extends MfdocFieldBaseTypePrimitive {
   def?: MfdocFieldObjectTypePrimitive<T>;
   mappings: MfdocMappingFn<
     T,
@@ -202,9 +208,15 @@ export interface MfdocSdkParamsBodyTypePrimitive<
 
 export interface MfdocHttpEndpointMultipartFormdataTypePrimitive<
   T extends object = any
-> extends MfdocFieldIdPrimitive {
+> extends MfdocFieldBaseTypePrimitive {
   items?: MfdocFieldObjectTypePrimitive<T>;
   description?: string;
+}
+
+export interface MfdocCustomTypePrimitive extends MfdocFieldBaseTypePrimitive {
+  name: string;
+  description?: string;
+  descriptionLink?: string;
 }
 
 export interface MfdocHttpEndpointDefinitionTypePrimitive<
@@ -215,7 +227,7 @@ export interface MfdocHttpEndpointDefinitionTypePrimitive<
   TResponseHeaders extends AnyObject = AnyObject,
   TResponseBody extends AnyObject = AnyObject,
   TSdkParams extends AnyObject = TRequestBody
-> extends MfdocFieldIdPrimitive {
+> extends MfdocFieldBaseTypePrimitive {
   path: string;
   method: MfdocHttpEndpointMethod;
   pathParamaters?: MfdocFieldObjectTypePrimitive<TPathParameters>;
@@ -414,6 +426,14 @@ function constructBinary(
   };
 }
 
+function constructCustomType(
+  params: OmitFrom<MfdocCustomTypePrimitive, '__id'>
+): MfdocCustomTypePrimitive {
+  return {
+    __id: kMfdocFieldTypes.CustomType,
+    ...params,
+  };
+}
 function constructHttpEndpointMultipartFormdata<T extends object>(
   params: OmitFrom<MfdocHttpEndpointMultipartFormdataTypePrimitive<T>, '__id'>
 ): MfdocHttpEndpointMultipartFormdataTypePrimitive<T> {
@@ -474,6 +494,7 @@ export const mfdocConstruct = {
   constructBinary,
   constructHttpEndpointMultipartFormdata,
   constructHttpEndpointDefinition,
+  constructCustomType,
 };
 
 export function objectHasRequiredFields(
@@ -489,9 +510,7 @@ export function objectHasRequiredFields(
 export function isMfdocFieldBase(
   data: any
 ): data is MfdocFieldBaseTypePrimitive {
-  return (
-    data && (data as MfdocFieldBaseTypePrimitive).__id === kMfdocFieldTypes.Base
-  );
+  return data && (data as MfdocFieldBaseTypePrimitive).__id;
 }
 
 export function isMfdocFieldString(
@@ -566,6 +585,23 @@ export function isMfdocFieldObject(
   );
 }
 
+export function isMfdocFieldObjectField(
+  data: any
+): data is MfdocFieldObjectFieldTypePrimitive<any, any> {
+  return (
+    data &&
+    (data as MfdocFieldObjectFieldTypePrimitive<any, any>).__id ===
+      kMfdocFieldTypes.ObjectField
+  );
+}
+
+export function isMfdocCustomType(data: any): data is MfdocCustomTypePrimitive {
+  return (
+    data &&
+    (data as MfdocCustomTypePrimitive).__id === kMfdocFieldTypes.CustomType
+  );
+}
+
 export function isMfdocFieldOrCombination(
   data: any
 ): data is MfdocFieldOrCombinationTypePrimitive<any> {
@@ -631,15 +667,3 @@ export function isMfdocSdkParamsBody(
       kMfdocFieldTypes.SdkParamsBody
   );
 }
-
-type KT = OptionalKeysOf<{
-  errors: {
-    message: string;
-  }[];
-}>;
-
-type KM = MfdocFieldObjectFieldsMap<{
-  errors: {
-    message: string;
-  }[];
-}>;

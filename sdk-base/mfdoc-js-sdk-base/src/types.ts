@@ -63,5 +63,5 @@ export type MfdocEndpointWithBinaryResponseParamsOptional<
 };
 
 export interface IRefreshAuthToken {
-  getAuthToken(): string | undefined;
+  getBearerToken(): string | undefined;
 }

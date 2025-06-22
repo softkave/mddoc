@@ -16,7 +16,7 @@ export class MfdocEndpointsBase<
     const authToken = params?.authToken || this.config.authToken;
     return typeof authToken === 'string'
       ? authToken
-      : authToken?.getAuthToken();
+      : authToken?.getBearerToken();
   }
 
   protected getServerURL(params?: {serverURL?: string}) {

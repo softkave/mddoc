@@ -94,9 +94,8 @@ mfdoc gen-http-api-endpoints-info ./src -t "v1,public" -o ./docs/endpoints.json
 ### Common Workflow
 
 1. **Setup**: Use `setup-js-sdk` to initialize your project structure
-2. **Generate Documentation**: Use `gen-http-api-table-of-content` to create API documentation
-3. **Generate SDK**: Use `gen-js-sdk` to create a JavaScript SDK for your API
-4. **Extract Endpoint Info**: Use `gen-http-api-endpoints-info` to get detailed endpoint information
+2. **Generate SDK**: Use `gen-js-sdk` to create a JavaScript SDK for your API
+3. **Extract Endpoint Info**: Use `gen-http-api-endpoints-info` to get detailed endpoint information
 
 ### Tags
 

@@ -3,15 +3,17 @@ import {mfdocConstruct, MfdocHttpEndpointMethod} from 'mfdoc';
 export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
   method: MfdocHttpEndpointMethod.Get,
   path: '/user/:userId/info',
-  description: 'Get user',
+  description: 'Get user info',
   tags: ['user'],
   requestHeaders: mfdocConstruct.constructObject<{
     'x-api-key': string;
   }>({
     name: 'GetUserRequestHeaders',
+    description: 'Request headers for the user info endpoint',
     fields: {
       'x-api-key': mfdocConstruct.constructObjectField({
         required: true,
+        description: 'Required for authentication',
         data: mfdocConstruct.constructString({
           description: 'The API key',
         }),
@@ -22,9 +24,11 @@ export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
     'x-api-key': string;
   }>({
     name: 'GetUserResponseHeaders',
+    description: 'Response headers for the user info endpoint',
     fields: {
       'x-api-key': mfdocConstruct.constructObjectField({
         required: true,
+        example: '1234567890',
         data: mfdocConstruct.constructString({
           description: 'The API key',
         }),
@@ -37,6 +41,12 @@ export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
     };
   }>({
     name: 'GetUserResponseBody',
+    description: 'The response body for the user info endpoint',
+    example: {
+      user: {
+        id: '1234567890',
+      },
+    },
     fields: {
       user: mfdocConstruct.constructObjectField({
         required: true,
@@ -56,6 +66,7 @@ export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
   }),
   pathParamaters: mfdocConstruct.constructObject<{
     userId: string;
+    slugId: string;
   }>({
     name: 'GetUserPathParamaters',
     fields: {
@@ -63,6 +74,12 @@ export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
         required: true,
         data: mfdocConstruct.constructString({
           description: 'The user id',
+        }),
+      }),
+      slugId: mfdocConstruct.constructObjectField({
+        required: true,
+        data: mfdocConstruct.constructString({
+          description: 'The slug id',
         }),
       }),
     },
@@ -127,6 +144,10 @@ export const endpoint01 = mfdocConstruct.constructHttpEndpointDefinition({
             message: string;
           }>({
             name: 'Error',
+            description: 'The error object',
+            example: {
+              message: 'The error message',
+            },
             fields: {
               message: mfdocConstruct.constructObjectField({
                 required: true,

@@ -1,6 +1,7 @@
 import assert from 'assert';
 import fse from 'fs-extra';
 import {forEach, get, last, set} from 'lodash-es';
+import type {MfdocEndpointsTableOfContent} from 'mfdoc/endpointInfo.d.ts';
 import {posix} from 'path';
 import {getEndpointsFromSrcPath} from './getEndpointsFromSrcPath.js';
 import {kMfdocHttpHeaderItems} from './headers.js';
@@ -10,14 +11,6 @@ import {
 } from './mfdoc.js';
 import {kMfdocHttpResponseItems} from './response.js';
 import {filterEndpointsByTags, getEndpointNames} from './utils.js';
-
-export interface MfdocEndpointsTableOfContent {
-  filepath?: string;
-  /** basename with method if item is an endpoint */
-  basename: string;
-  names: string[];
-  children: Record<string, MfdocEndpointsTableOfContent>;
-}
 
 function generateEndpointInfoFromEndpoints(params: {
   endpoints: MfdocHttpEndpointDefinitionTypePrimitive[];

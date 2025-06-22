@@ -44,8 +44,11 @@ import {
 } from './mfdoc.js';
 import {
   filterEndpointsByTags,
+  gatherDescriptionAndExample,
+  getDescriptionForJsDoc,
   getEndpointNames,
   hasPackageJson,
+  stringToJsDoc,
 } from './utils.js';
 
 function getEnumType(doc: Doc, item: MfdocFieldStringTypePrimitive) {
@@ -57,7 +60,10 @@ function getEnumType(doc: Doc, item: MfdocFieldStringTypePrimitive) {
   const text = item.valid?.map(next => `"${next}"`).join(' | ') ?? 'string';
   if (name) {
     doc.generatedTypeCache.set(name, true);
-    doc.appendType(`export type ${name} = ${text}`);
+    doc.appendToType(
+      `export type ${name} = ${text}`,
+      getDescriptionForJsDoc(item.description, item.example)
+    );
     return name;
   }
 
@@ -176,7 +182,15 @@ function generateObjectDefinition(
     const entryType = getType(doc, value.data, asFetchResponse);
     const separator = value.required ? ':' : '?:';
     key = shouldEncloseObjectKeyInQuotes(key) ? `"${key}"` : key;
-    const entry = `${key}${separator} ${entryType};`;
+    let entry = `${key}${separator} ${entryType};`;
+    const {descriptions, examples} = gatherDescriptionAndExample(value);
+    let comment = getDescriptionForJsDoc(descriptions, examples);
+
+    if (comment) {
+      comment = stringToJsDoc(comment) + '\n';
+    }
+
+    entry = `${comment}${entry}`;
     entries.push(entry);
 
     const valueData = value.data;
@@ -194,9 +208,12 @@ function generateObjectDefinition(
     }
   }
 
-  doc.appendType(`export type ${name} = {`);
-  entries.concat(extraFields).forEach(entry => doc.appendType(entry));
-  doc.appendType('}');
+  doc.appendToType(
+    `export type ${name} = {`,
+    getDescriptionForJsDoc(item.description, item.example)
+  );
+  entries.concat(extraFields).forEach(entry => doc.appendToType(entry));
+  doc.appendToType('}');
   doc.generatedTypeCache.set(name, true);
   return name;
 }
@@ -384,7 +401,12 @@ function generateEndpointCode(
     }, opts, ${mapping.length ? 'mapping' : ''});
   }`;
 
-  doc.appendToClass(text, className, 'AbstractSdkEndpoints');
+  doc.appendToClass(
+    text,
+    className,
+    'AbstractSdkEndpoints',
+    getDescriptionForJsDoc(endpoint.description, endpoint.example)
+  );
 }
 
 function generateEveryEndpointCode(
@@ -544,11 +566,33 @@ export async function genJsSdk(params: {
   ]);
 
   await addCodeLinesToIndex({
+    indexPath: path.normalize(endpointsDir + '/endpointsIndex.ts'),
+    codeLines: [
+      {
+        line: `export * from './${typesFilename}.js';`,
+        keywords: [`export * from './${typesFilename}.js';`],
+      },
+      {
+        line: `export * from './${codesFilename}.js';`,
+        keywords: [`export * from './${codesFilename}.js';`],
+      },
+      {
+        line: `export type {SdkConfig} from './SdkConfig.js';`,
+        keywords: ['SdkConfig'],
+      },
+    ],
+  });
+  await addCodeLinesToIndex({
     indexPath: path.normalize(endpointsDir + '/index.ts'),
     codeLines: [
-      `export * from './${typesFilename}.js';`,
-      `export * from './${codesFilename}.js';`,
-      `export type {SdkConfig} from './SdkConfig.js';`,
+      {
+        line: `export * from './endpointsIndex.js';`,
+        keywords: ['endpointsIndex'],
+      },
+      {
+        line: `export * from 'mfdoc-js-sdk-base';`,
+        keywords: ['mfdoc-js-sdk-base'],
+      },
     ],
   });
 
