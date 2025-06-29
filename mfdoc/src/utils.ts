@@ -66,7 +66,7 @@ export function getEndpointNames(
     .split('/')
     .filter(p => !p.startsWith(':') && p.length > 0);
   const names = endpointName || pathname;
-  assert(names.length > 0, 'names is required');
+  assert.ok(names.length > 0, 'names is required');
   return names;
 }
 

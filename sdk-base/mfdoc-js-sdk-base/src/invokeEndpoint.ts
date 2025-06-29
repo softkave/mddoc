@@ -79,7 +79,7 @@ export async function invokeEndpoint(props: InvokeEndpointParams) {
 
   let endpointURL = propsEndpointURL;
   if (!endpointURL) {
-    assert(serverURL, 'serverURL is required');
+    assert.ok(serverURL, 'serverURL is required');
     endpointURL = serverURL + path;
   }
 

@@ -74,7 +74,7 @@ function setEndpointInTableOfContent(params: {
 
   const p = endpointNames.join('.children.');
   const basename = last(endpointNames);
-  assert(basename, 'basename is required');
+  assert.ok(basename, 'basename is required');
 
   const existing = get(tableOfContent.children, p);
   const item: MfdocEndpointsTableOfContent = {

@@ -8,7 +8,10 @@ import {
 
 export async function getEndpointsFromSrcPath(params: {srcPath: string}) {
   const {srcPath} = params;
-  assert(isAbsolute(srcPath), `srcPath must be an absolute path: ${srcPath}`);
+  assert.ok(
+    isAbsolute(srcPath),
+    `srcPath must be an absolute path: ${srcPath}`
+  );
   const tsconfigPath = path.join(
     import.meta.dirname,
     '..',

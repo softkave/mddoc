@@ -430,7 +430,7 @@ function generateEveryEndpointCode(
 
   endpoints.forEach(nextEndpoint => {
     const names = getEndpointNames(nextEndpoint).map(name => camelCase(name));
-    assert(
+    assert.ok(
       names.length >= 2,
       `Endpoint name must have at least 2 parts: ${names}`
     );
@@ -527,7 +527,7 @@ export async function genJsSdk(params: {
   endpointsPath: string;
 }) {
   const {endpoints, filenamePrefix, outputDir, endpointsPath} = params;
-  assert(
+  assert.ok(
     await hasPackageJson({outputPath: outputDir}),
     'outputDir must be a valid npm package'
   );
